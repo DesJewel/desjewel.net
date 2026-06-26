@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projects &#x2661; DesJewel</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="../index.html" class="logo">DesJewel</a>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="index.html" class="active">Projects</a></li>
+        <li><a href="../about/index.html">About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="page-header">
+      <h1>Projects</h1>
+      <p>Open source work from <a href="https://github.com/DesJewel" target="_blank" rel="noopener noreferrer">github.com/DesJewel</a></p>
+    </div>
+
+    <div class="projects-grid" id="projects-grid">
+      <div class="loading">Loading projects&hellip;</div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-socials">
+        <a href="https://x.com/DesJewel" target="_blank" rel="noopener noreferrer" title="Twitter / X">
+          <i class="fa-brands fa-x-twitter"></i>
+        </a>
+        <a href="https://bsky.app/profile/desjewel.net" target="_blank" rel="noopener noreferrer" title="Bluesky">
+          <i class="fa-brands fa-bluesky"></i>
+        </a>
+        <a href="https://www.instagram.com/desjwl" target="_blank" rel="noopener noreferrer" title="Instagram">
+          <i class="fa-brands fa-instagram"></i>
+        </a>
+        <a href="https://www.youtube.com/@DesJewel" target="_blank" rel="noopener noreferrer" title="YouTube">
+          <i class="fa-brands fa-youtube"></i>
+        </a>
+      </div>
+      <p class="footer-copy">&copy; 2026 DesJewel</p>
+    </div>
+  </footer>
+
+  <script>
+    const LANG_COLORS = {
+      Python: '#3572A5',
+      JavaScript: '#f1e05a',
+      TypeScript: '#2b7489',
+      Java: '#b07219',
+      'C#': '#178600',
+      'C++': '#f34b7d',
+      C: '#555555',
+      Rust: '#dea584',
+      Go: '#00ADD8',
+      Ruby: '#701516',
+      PHP: '#4F5D95',
+      Kotlin: '#A97BFF',
+      Swift: '#ffac45',
+      HTML: '#e34c26',
+      CSS: '#563d7c',
+      Shell: '#89e051',
+      Lua: '#000080',
+    };
+
+    const ICONS = {
+      Python: 'fa-brands fa-python',
+      JavaScript: 'fa-brands fa-js',
+      TypeScript: 'fa-brands fa-js',
+      Java: 'fa-brands fa-java',
+      'C#': 'fa-solid fa-code',
+      'C++': 'fa-solid fa-code',
+      HTML: 'fa-brands fa-html5',
+      CSS: 'fa-brands fa-css3-alt',
+      PHP: 'fa-brands fa-php',
+      Rust: 'fa-solid fa-gear',
+      Go: 'fa-solid fa-code',
+      Ruby: 'fa-solid fa-gem',
+      default: 'fa-solid fa-code-branch',
+    };
+
+    function getIcon(lang) {
+      return ICONS[lang] || ICONS.default;
+    }
+
+    async function loadProjects() {
+      const grid = document.getElementById('projects-grid');
+      try {
+        const res = await fetch('https://api.github.com/users/DesJewel/repos?per_page=100&sort=updated');
+        if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+        const repos = await res.json();
+
+        const filtered = repos.filter(r => !r.fork || r.description);
+
+        if (filtered.length === 0) {
+          grid.innerHTML = '<p class="loading">No public repositories found.</p>';
+          return;
+        }
+
+        grid.innerHTML = filtered.map(repo => {
+          const lang = repo.language || null;
+          const langColor = lang ? (LANG_COLORS[lang] || 'var(--primary)') : null;
+          const icon = getIcon(lang);
+          const desc = repo.description || 'No description provided.';
+
+          return `
+            <a class="project-card" href="${repo.html_url}" target="_blank" rel="noopener noreferrer">
+              <div class="project-card-icon"><i class="${icon}"></i></div>
+              <h3>${repo.name}</h3>
+              <p>${desc}</p>
+              ${lang ? `
+                <div class="project-lang">
+                  <span class="lang-dot" style="background:${langColor}"></span>
+                  ${lang}
+                </div>` : ''}
+            </a>`;
+        }).join('');
+
+      } catch (err) {
+        grid.innerHTML = `<p class="loading">Could not load projects. <a href="https://github.com/DesJewel" target="_blank" rel="noopener noreferrer">View on GitHub</a></p>`;
+        console.error(err);
+      }
+    }
+
+    loadProjects();
+  </script>
+
+</body>
+</html>
